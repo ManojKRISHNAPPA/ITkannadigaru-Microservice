@@ -1,0 +1,144 @@
+version: "3.9"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: instaclone-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: instaclone
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Backend Service
+  backend:
+    image: deployecho-backend:${TAG}
+    container_name: deployecho-backend
+    environment:
+      ENV: dev
+      VERSION: ${TAG}
+      SERVICE: deployecho-backend
+      PORT: 8080
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # Frontend Service
+  frontend:
+    image: deployecho-frontend:${TAG}
+    container_name: deployecho-frontend
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # Auth Service
+  auth-service:
+    image: instaclone-auth:${TAG}
+    container_name: instaclone-auth
+    environment:
+      ENV: dev
+      VERSION: ${TAG}
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: instaclone
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+    ports:
+      - "3001:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # User Service
+  user-service:
+    image: instaclone-user:${TAG}
+    container_name: instaclone-user
+    environment:
+      ENV: dev
+      VERSION: ${TAG}
+      PORT: 3002
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: instaclone
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      S3_BUCKET: ${S3_BUCKET:-instaclone-media}
+      S3_REGION: ${S3_REGION:-us-east-1}
+    ports:
+      - "3002:3002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  # Nginx Reverse Proxy
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: deployecho-proxy
+    ports:
+      - "8088:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+      - auth-service
+      - user-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
