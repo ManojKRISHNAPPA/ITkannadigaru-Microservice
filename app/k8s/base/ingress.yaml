@@ -1,0 +1,128 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: instaclone-ingress
+  annotations:
+    # Use nginx ingress controller
+    kubernetes.io/ingress.class: "nginx"
+
+    # Enable CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+
+    # URL rewriting for API paths
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+    # Connection timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+
+    # Body size limit (for file uploads)
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+    # SSL/TLS configuration (uncomment when you have SSL cert)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  # Uncomment this section when you have SSL certificate
+  # tls:
+  # - hosts:
+  #   - instaclone.yourdomain.com
+  #   secretName: instaclone-tls
+
+  rules:
+  - host: instaclone.local  # Change this to your domain
+    http:
+      paths:
+      # Auth Service - handles /auth/* requests
+      - path: /auth(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 3001
+
+      # User Service - handles /users/* requests
+      - path: /users(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 3002
+
+      # Backend Service - handles /api/* requests
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 8080
+
+      # Frontend - handles all other requests (must be last)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+---
+# Alternative Ingress without path rewriting (simpler approach)
+# Use this if you want to keep the /auth, /users, /api prefixes in your services
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: instaclone-ingress-simple
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  rules:
+  - host: instaclone.local
+    http:
+      paths:
+      # Auth Service
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 3001
+
+      # User Service
+      - path: /users
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 3002
+
+      # Backend Service
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 8080
+
+      # Frontend (default route)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80

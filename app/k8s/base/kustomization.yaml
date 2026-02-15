@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: instaclone
+
+resources:
+  - configmap.yaml
+  - secrets.yaml
+  - mysql-statefulset.yaml
+  - backend-deployment.yaml
+  - auth-service-deployment.yaml
+  - user-service-deployment.yaml
+  - frontend-deployment.yaml
+  - ingress.yaml
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/name: instaclone
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/managed-by: kustomize
+
+# Images to be updated (useful for CI/CD)
+images:
+  - name: yourdockerhubusername/instaclone-backend
+    newName: yourdockerhubusername/instaclone-backend
+    newTag: latest
+  - name: yourdockerhubusername/instaclone-auth
+    newName: yourdockerhubusername/instaclone-auth
+    newTag: latest
+  - name: yourdockerhubusername/instaclone-user
+    newName: yourdockerhubusername/instaclone-user
+    newTag: latest
+  - name: yourdockerhubusername/instaclone-frontend
+    newName: yourdockerhubusername/instaclone-frontend
+    newTag: latest
+
+# ConfigMap generator (alternative to configmap.yaml)
+# configMapGenerator:
+# - name: instaclone-config
+#   literals:
+#   - DB_HOST=mysql
+#   - DB_PORT=3306
+
+# Secret generator (alternative to secrets.yaml - more secure)
+# secretGenerator:
+# - name: instaclone-secrets
+#   literals:
+#   - mysql-root-password=changeme
+#   - jwt-secret=changeme
