@@ -14,9 +14,11 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+      - name: ecr-registry-secret
       containers:
       - name: backend
-        image: yourdockerhubusername/instaclone-backend:latest
+        image: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/backend-service:1
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

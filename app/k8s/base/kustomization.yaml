@@ -21,18 +21,14 @@ commonLabels:
 
 # Images to be updated (useful for CI/CD)
 images:
-  - name: yourdockerhubusername/instaclone-backend
-    newName: yourdockerhubusername/instaclone-backend
-    newTag: latest
-  - name: yourdockerhubusername/instaclone-auth
-    newName: yourdockerhubusername/instaclone-auth
-    newTag: latest
-  - name: yourdockerhubusername/instaclone-user
-    newName: yourdockerhubusername/instaclone-user
-    newTag: latest
-  - name: yourdockerhubusername/instaclone-frontend
-    newName: yourdockerhubusername/instaclone-frontend
-    newTag: latest
+  - name: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/backend-service
+    newTag: "1"
+  - name: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/auth-service
+    newTag: "1"
+  - name: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/user-service
+    newTag: "1"
+  - name: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/frontend
+    newTag: "1"
 
 # ConfigMap generator (alternative to configmap.yaml)
 # configMapGenerator:

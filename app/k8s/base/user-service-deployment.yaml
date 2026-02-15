@@ -14,9 +14,11 @@ spec:
       labels:
         app: user-service
     spec:
+      imagePullSecrets:
+      - name: ecr-registry-secret
       containers:
       - name: user-service
-        image: yourdockerhubusername/instaclone-user:latest
+        image: 156299069385.dkr.ecr.us-west-2.amazonaws.com/itkannadigaru/user-service:1
         imagePullPolicy: Always
         ports:
         - containerPort: 3002
