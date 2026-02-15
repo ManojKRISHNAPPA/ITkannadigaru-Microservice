@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITkannadiagru Instagram Clone - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            color: #262626;
+        }
+
+        /* Header Navigation */
+        .header {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-bar {
+            padding: 8px 16px;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            width: 250px;
+            outline: none;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 935px;
+            margin: 80px auto 20px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+        }
+
+        /* Feed Section */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .post-image {
+            width: 100%;
+            background: #f0f0f0;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+        }
+
+        .post-actions {
+            padding: 12px 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .action-btn {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.6;
+        }
+
+        .likes {
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 16px 8px;
+        }
+
+        .caption {
+            padding: 0 16px 12px;
+            font-size: 14px;
+        }
+
+        .caption .username {
+            margin-right: 8px;
+        }
+
+        .comments {
+            padding: 0 16px 12px;
+            color: #8e8e8e;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .timestamp {
+            padding: 0 16px 12px;
+            font-size: 10px;
+            color: #8e8e8e;
+            text-transform: uppercase;
+        }
+
+        .comment-input {
+            border-top: 1px solid #efefef;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .comment-input input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .post-btn {
+            color: #0095f6;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        .profile-card {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .profile-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .profile-info p {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #efefef;
+            margin-top: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .suggestions {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .suggestions-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #8e8e8e;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-info .username {
+            font-size: 12px;
+        }
+
+        .suggestion-info .subtitle {
+            font-size: 11px;
+            color: #8e8e8e;
+        }
+
+        .follow-btn {
+            color: #0095f6;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Branding Badge */
+        .branding-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .branding-badge:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Tabs */
+        .tabs {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .tab.active {
+            background: #0095f6;
+            color: white;
+        }
+
+        .tab:not(.active) {
+            background: #fafafa;
+            color: #262626;
+        }
+
+        .tab:not(.active):hover {
+            background: #efefef;
+        }
+
+        /* Create Post Button */
+        .create-post-btn {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .create-post-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .header-content {
+                padding: 0 10px;
+            }
+
+            .search-bar {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📸 ITkannadiagru</div>
+            <input type="text" class="search-bar" placeholder="Search users, hashtags...">
+            <div class="nav-icons">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-icon">💬</span>
+                <span class="nav-icon">➕</span>
+                <span class="nav-icon">❤️</span>
+                <div class="avatar" style="width: 28px; height: 28px; font-size: 14px;">U</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Feed Section -->
+        <main class="feed">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active">🏠 Timeline</div>
+                <div class="tab">🔍 Explore</div>
+            </div>
+
+            <!-- Create Post Button -->
+            <button class="create-post-btn">➕ Create New Post</button>
+
+            <!-- Post Card 1 -->
+            <article class="post-card">
+                <div class="post-header">
+                    <div class="avatar">IT</div>
+                    <span class="username">itkannadiagru</span>
+                </div>
+                <img src="data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='600' height='600' fill='%23667eea'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dy='.3em' font-family='Arial'%3EWelcome to Instagram Clone! 🎉%3C/text%3E%3C/svg%3E"
+                     alt="Post" class="post-image">
+                <div class="post-actions">
+                    <button class="action-btn">❤️</button>
+                    <button class="action-btn">💬</button>
+                    <button class="action-btn">📤</button>
+                    <button class="action-btn" style="margin-left: auto;">🔖</button>
+                </div>
+                <div class="likes">142 likes</div>
+                <div class="caption">
+                    <span class="username">itkannadiagru</span>
+                    Welcome to our Instagram Clone! Built with React, Node.js, and Kubernetes.
+                    <span style="color: #0095f6;">#instagram #clone #tech #kubernetes</span>
+                </div>
+                <div class="comments">View all 24 comments</div>
+                <div class="timestamp">2 hours ago</div>
+                <div class="comment-input">
+                    <input type="text" placeholder="Add a comment...">
+                    <button class="post-btn">Post</button>
+                </div>
+            </article>
+
+            <!-- Post Card 2 -->
+            <article class="post-card">
+                <div class="post-header">
+                    <div class="avatar">JD</div>
+                    <span class="username">john_dev</span>
+                </div>
+                <img src="data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='600' height='600' fill='%23f09433'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dy='.3em' font-family='Arial'%3EMicroservices Architecture 🚀%3C/text%3E%3C/svg%3E"
+                     alt="Post" class="post-image">
+                <div class="post-actions">
+                    <button class="action-btn" style="color: #ed4956;">❤️</button>
+                    <button class="action-btn">💬</button>
+                    <button class="action-btn">📤</button>
+                    <button class="action-btn" style="margin-left: auto;">🔖</button>
+                </div>
+                <div class="likes">89 likes</div>
+                <div class="caption">
+                    <span class="username">john_dev</span>
+                    Amazing microservices setup! 7 services running seamlessly 💪
+                    <span style="color: #0095f6;">#microservices #devops</span>
+                </div>
+                <div class="comments">View all 12 comments</div>
+                <div class="timestamp">5 hours ago</div>
+                <div class="comment-input">
+                    <input type="text" placeholder="Add a comment...">
+                    <button class="post-btn">Post</button>
+                </div>
+            </article>
+
+            <!-- Post Card 3 -->
+            <article class="post-card">
+                <div class="post-header">
+                    <div class="avatar">SK</div>
+                    <span class="username">sarah_k</span>
+                </div>
+                <img src="data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='600' height='600' fill='%23dc2743'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dy='.3em' font-family='Arial'%3EReal-time Chat 💬%3C/text%3E%3C/svg%3E"
+                     alt="Post" class="post-image">
+                <div class="post-actions">
+                    <button class="action-btn">❤️</button>
+                    <button class="action-btn">💬</button>
+                    <button class="action-btn">📤</button>
+                    <button class="action-btn" style="margin-left: auto;">🔖</button>
+                </div>
+                <div class="likes">56 likes</div>
+                <div class="caption">
+                    <span class="username">sarah_k</span>
+                    Love the real-time chat feature with WebSockets! ⚡
+                    <span style="color: #0095f6;">#websocket #realtime #chat</span>
+                </div>
+                <div class="comments">View all 8 comments</div>
+                <div class="timestamp">1 day ago</div>
+                <div class="comment-input">
+                    <input type="text" placeholder="Add a comment...">
+                    <button class="post-btn">Post</button>
+                </div>
+            </article>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">U</div>
+                    <div class="profile-info">
+                        <h3>yourname</h3>
+                        <p>Your Full Name</p>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-value">24</span>
+                        <span class="stat-label">Posts</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">312</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">180</span>
+                        <span class="stat-label">Following</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="suggestions">
+                <div class="suggestions-header">
+                    <span class="suggestions-title">Suggestions For You</span>
+                    <button class="post-btn">See All</button>
+                </div>
+
+                <div class="suggestion-item">
+                    <div class="suggestion-avatar">M</div>
+                    <div class="suggestion-info">
+                        <div class="username">mike_tech</div>
+                        <div class="subtitle">Followed by john_dev</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+
+                <div class="suggestion-item">
+                    <div class="suggestion-avatar">A</div>
+                    <div class="suggestion-info">
+                        <div class="username">anna_design</div>
+                        <div class="subtitle">Followed by sarah_k</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+
+                <div class="suggestion-item">
+                    <div class="suggestion-avatar">R</div>
+                    <div class="suggestion-info">
+                        <div class="username">raj_cloud</div>
+                        <div class="subtitle">New to Instagram</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+
+                <div class="suggestion-item">
+                    <div class="suggestion-avatar">L</div>
+                    <div class="suggestion-info">
+                        <div class="username">lisa_k8s</div>
+                        <div class="subtitle">Followed by 3 others</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Branding Badge -->
+    <div class="branding-badge">
+        <span>🎥</span>
+        <span>Built with ITkannadiagru YouTube Channel</span>
+    </div>
+
+    <script>
+        // Interactive elements
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === '❤️') {
+                    this.style.color = this.style.color === 'rgb(237, 73, 86)' ? '' : '#ed4956';
+                }
+            });
+        });
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.follow-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.textContent = this.textContent === 'Follow' ? 'Following' : 'Follow';
+                this.style.color = this.textContent === 'Following' ? '#8e8e8e' : '#0095f6';
+            });
+        });
+
+        document.querySelector('.create-post-btn').addEventListener('click', function() {
+            alert('Create Post feature coming soon! This will open a modal to upload images and add captions.');
+        });
+
+        document.querySelector('.branding-badge').addEventListener('click', function() {
+            alert('Visit ITkannadiagru YouTube Channel for amazing DevOps tutorials!');
+        });
+
+        // Show notification on page load
+        setTimeout(() => {
+            console.log('🎉 Instagram Clone Demo');
+            console.log('Features:');
+            console.log('✅ User Authentication (Login/Register)');
+            console.log('✅ Timeline & Explore Feeds');
+            console.log('✅ Post Creation with Images');
+            console.log('✅ Likes & Comments');
+            console.log('✅ Follow/Unfollow Users');
+            console.log('✅ Real-time Chat (WebSocket)');
+            console.log('✅ Hashtag Search');
+            console.log('✅ User Profiles');
+            console.log('✅ AWS S3 Image Storage');
+            console.log('✅ 7 Microservices Architecture');
+            console.log('✅ Kubernetes Deployment');
+        }, 1000);
+    </script>
+</body>
+</html>

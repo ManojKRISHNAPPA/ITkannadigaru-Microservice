@@ -1,0 +1,24 @@
+global:
+  environment: dev
+
+backend:
+  image:
+    repository: 826828992763.dkr.ecr.us-east-1.amazonaws.com/deployecho-backend
+    tag: e4017e1-1
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    port: 8080
+
+frontend:
+  image:
+    repository: 826828992763.dkr.ecr.us-east-1.amazonaws.com/deployecho-frontend
+    tag: e4017e1-1
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    port: 80
+
+ingress:
+  enabled: true
+  className: alb

@@ -1,0 +1,19 @@
+{
+  "name": "instaclone-auth",
+  "version": "1.0.0",
+  "description": "Authentication service for Instagram clone",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

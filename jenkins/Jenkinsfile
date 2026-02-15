@@ -1,0 +1,121 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = "us-east-1"
+    AWS_DEFAULT_REGION = "us-east-1"
+    ACCOUNT_ID = "826828992763"
+    ECR = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+    CLUSTER = "deployecho"
+    NAMESPACE = "dev"
+
+    RELEASE = "deployecho"
+    CHART_DIR = "helm/deployecho"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Get Git SHA') {
+      steps {
+        script {
+          def gitSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          env.GIT_SHA = gitSha
+          env.TAG = "dev-${gitSha}"
+        }
+      }
+    }
+
+    stage('Login to ECR') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-creds',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            set -e
+            aws --version
+            aws sts get-caller-identity
+
+            aws ecr get-login-password --region "$AWS_REGION" | \
+              docker login --username AWS --password-stdin "$ECR"
+          '''
+        }
+      }
+    }
+
+    stage('Build & Push Backend') {
+      steps {
+        sh '''
+          set -e
+          docker buildx build --platform linux/amd64 \
+            -t "$ECR/deployecho-backend:$TAG" \
+            -f app/backend/Dockerfile app/backend \
+            --push
+        '''
+      }
+    }
+
+    stage('Build & Push Frontend') {
+      steps {
+        sh '''
+          set -e
+          docker buildx build --platform linux/amd64 \
+            -t "$ECR/deployecho-frontend:$TAG" \
+            -f app/frontend/Dockerfile app/frontend \
+            --push
+        '''
+      }
+    }
+
+    stage('Deploy to EKS (Helm)') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-creds',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            set -e
+            cd "$WORKSPACE"
+
+            aws sts get-caller-identity
+            aws eks update-kubeconfig --region "$AWS_REGION" --name "$CLUSTER"
+
+            # Install helm if missing
+            if ! command -v helm >/dev/null 2>&1; then
+              curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+            fi
+
+            # Ensure namespace exists
+            kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create ns "$NAMESPACE"
+
+            # Deploy using Helm + override image tags for this build
+            helm upgrade --install "$RELEASE" "$CHART_DIR" \
+              -n "$NAMESPACE" \
+              -f "$CHART_DIR/values.yaml" \
+              --set backend.image.repository="$ECR/deployecho-backend" \
+              --set backend.image.tag="$TAG" \
+              --set frontend.image.repository="$ECR/deployecho-frontend" \
+              --set frontend.image.tag="$TAG" \
+              --atomic --wait --timeout 5m
+
+            echo "=== Status ==="
+            kubectl get pods -n "$NAMESPACE"
+            kubectl get svc -n "$NAMESPACE"
+            kubectl get ingress -n "$NAMESPACE" || true
+          '''
+        }
+      }
+    }
+  }
+}

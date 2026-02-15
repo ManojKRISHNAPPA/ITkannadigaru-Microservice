@@ -1,0 +1,20 @@
+{
+  "name": "instaclone-user",
+  "version": "1.0.0",
+  "description": "User profile service for Instagram clone",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.5",
+    "multer": "^1.4.5-lts.1",
+    "@aws-sdk/client-s3": "^3.454.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
