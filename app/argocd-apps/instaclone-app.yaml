@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: instaclone
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: instaclone
+    app.kubernetes.io/component: application
+spec:
+  # Project
+  project: default
+
+  # Source - Your GitOps repository
+  # IMPORTANT: Update this with your actual GitOps repository URL
+  source:
+    repoURL: https://github.com/YOUR_USERNAME/instaclone-gitops.git
+    targetRevision: main
+    path: base
+
+    # Kustomize options
+    kustomize:
+      version: v5.0.0
+
+  # Destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: instaclone
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true        # Delete resources not in Git
+      selfHeal: true     # Auto-sync if manual changes detected
+      allowEmpty: false
+
+    syncOptions:
+      - CreateNamespace=true       # Auto-create namespace
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+
+    # Retry on failure
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences
+  ignoreDifferences:
+    # Ignore differences in replica count (for HPA)
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+
+    # Ignore differences in image pull secrets token
+    - group: ""
+      kind: Secret
+      name: ecr-registry-secret
+      jsonPointers:
+        - /data

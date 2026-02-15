@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: instaclone-project
+  namespace: argocd
+spec:
+  description: InstaClone Microservices Application
+
+  # Source repositories allowed for this project
+  sourceRepos:
+    - 'https://github.com/YOUR_USERNAME/instaclone-gitops.git'
+    - '*'  # Allow any repo (be more restrictive in production)
+
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: instaclone
+      server: https://kubernetes.default.svc
+    - namespace: instaclone-dev
+      server: https://kubernetes.default.svc
+    - namespace: instaclone-prod
+      server: https://kubernetes.default.svc
+
+  # Cluster resource allow list
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  # Namespace resource allow list
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Deny certain resource types (for safety)
+  # namespaceResourceBlacklist:
+  #   - group: ''
+  #     kind: ResourceQuota
+  #   - group: ''
+  #     kind: LimitRange
+
+  # RBAC policies
+  roles:
+    - name: developer
+      description: Read-only access for developers
+      policies:
+        - p, proj:instaclone-project:developer, applications, get, instaclone-project/*, allow
+        - p, proj:instaclone-project:developer, applications, sync, instaclone-project/*, deny
+      groups:
+        - developers
+
+    - name: admin
+      description: Full access for admins
+      policies:
+        - p, proj:instaclone-project:admin, applications, *, instaclone-project/*, allow
+      groups:
+        - admins

@@ -1,0 +1,70 @@
+# ArgoCD ApplicationSet for Multi-Environment Deployment
+# This creates separate ArgoCD Applications for dev, staging, and prod
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: instaclone-environments
+  namespace: argocd
+spec:
+  generators:
+    # Git generator - creates apps from directory structure
+    - list:
+        elements:
+          - env: dev
+            namespace: instaclone-dev
+            replicaCount: "1"
+            autoSync: "true"
+
+          - env: staging
+            namespace: instaclone-staging
+            replicaCount: "2"
+            autoSync: "true"
+
+          - env: prod
+            namespace: instaclone-prod
+            replicaCount: "3"
+            autoSync: "false"  # Manual sync for production
+
+  template:
+    metadata:
+      name: 'instaclone-{{env}}'
+      labels:
+        environment: '{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/YOUR_USERNAME/instaclone-gitops.git
+        targetRevision: main
+        path: 'overlays/{{env}}'
+
+        kustomize:
+          version: v5.0.0
+          # Override replicas based on environment
+          replicas:
+            - name: backend
+              count: '{{replicaCount}}'
+            - name: auth-service
+              count: '{{replicaCount}}'
+            - name: user-service
+              count: '{{replicaCount}}'
+            - name: frontend
+              count: '{{replicaCount}}'
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: '{{autoSync}}'
+        syncOptions:
+          - CreateNamespace=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
